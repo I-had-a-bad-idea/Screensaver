@@ -118,15 +118,20 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        // Collect particle positions
+        // Color cycling over time
+        float t = SDL_GetTicks() * 0.001f; // time in seconds
+        int r = (int)(128 + 127 * std::sin(t * 0.5f));
+        int g = (int)(128 + 127 * std::sin(t * 0.65f + 2));
+        int b = (int)(128 + 127 * std::sin(t * 0.35f + 4));
+        SDL_SetRenderDrawColor(renderer, r, g, b, 255);
+
+
+        // Prepare and draw points
         std::vector<SDL_Point> sdlPoints;
         sdlPoints.reserve(particles.size());
         for (const auto& p : particles) {
             sdlPoints.push_back({ (int)p.x, (int)p.y });
         }
-
-        // Draw all particles in white
-        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
         SDL_RenderDrawPoints(renderer, sdlPoints.data(), (int)sdlPoints.size());
 
         SDL_RenderPresent(renderer);
