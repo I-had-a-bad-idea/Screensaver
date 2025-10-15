@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <ctime>
+#include <algorithm>
 
 struct Particle {
     float x, y;
@@ -15,7 +16,7 @@ int main(int argc, char* argv[]) {
     const float DAMP = 0.99f;
     const int SCREEN_W = 1920;
     const int SCREEN_H = 1080;
-    const float MARGIN = 50.0f;
+    const float MARGIN = 5.0f;
 
     SDL_Init(SDL_INIT_VIDEO);
     SDL_Window* window = SDL_CreateWindow("Gravity Particles",
@@ -38,6 +39,7 @@ int main(int argc, char* argv[]) {
     float cx = SCREEN_W/2.0f, cy = SCREEN_H/2.0f;
     float cvx = ((rand() / (float)RAND_MAX) * 6 - 3);
     float cvy = ((rand() / (float)RAND_MAX) * 6 - 3);
+    
 
     bool running = true;
     SDL_Event event;
@@ -51,8 +53,12 @@ int main(int argc, char* argv[]) {
         // Move gravity point
         cx += cvx;
         cy += cvy;
-        if(cx < MARGIN || cx > SCREEN_W - MARGIN) { cvx = -cvx*0.9f; cx = std::fmax(MARGIN, std::fmin(SCREEN_W - MARGIN, cx)); }
-        if(cy < MARGIN || cy > SCREEN_H - MARGIN) { cvy = -cvy*0.9f; cy = std::fmax(MARGIN, std::fmin(SCREEN_H - MARGIN, cy)); }
+        
+        if(cx < MARGIN) { cx = MARGIN; cvx = -cvx; }
+        if(cx > SCREEN_W - MARGIN) { cx = SCREEN_W - MARGIN; cvx = -cvx; }
+        if(cy < MARGIN) { cy = MARGIN; cvy = -cvy; }
+        if(cy > SCREEN_H - MARGIN) { cy = SCREEN_H - MARGIN; cvy = -cvy; }
+
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
