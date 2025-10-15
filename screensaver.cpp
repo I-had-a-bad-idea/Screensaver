@@ -8,12 +8,17 @@
 struct Particle {
     float x, y;
     float vx, vy;
+    float nearTime = 0.0f; // seconds near the gravity point
 };
 
 int main(int argc, char* argv[]) {
-    const int NUM_PARTICLES = 10000;
+
+    const int NUM_PARTICLES = 10000; // particle count
     const float G = 500.0f;
     const float DAMP = 0.99f;
+    const float NEAR_RADIUS = 10.0f; // radius for respawn check
+    const float RESPAWN_TIME = 0.5f; // seconds stuck near center
+    const float DELTA_TIME = 0.016f; // ~60 FPS
     const int SCREEN_W = 1920;
     const int SCREEN_H = 1080;
     const float MARGIN = 5.0f;
@@ -36,10 +41,9 @@ int main(int argc, char* argv[]) {
     }
 
     // Gravity point
-    float cx = SCREEN_W/2.0f, cy = SCREEN_H/2.0f;
+    float cx = SCREEN_W / 2.0f, cy = SCREEN_H / 2.0f;
     float cvx = ((rand() / (float)RAND_MAX) * 6 - 3);
     float cvy = ((rand() / (float)RAND_MAX) * 6 - 3);
-    
 
     bool running = true;
     SDL_Event event;
@@ -53,49 +57,61 @@ int main(int argc, char* argv[]) {
         // Move gravity point
         cx += cvx;
         cy += cvy;
-        
+
+        // Bounce off screen edges
         if(cx < MARGIN) { cx = MARGIN; cvx = -cvx; }
         if(cx > SCREEN_W - MARGIN) { cx = SCREEN_W - MARGIN; cvx = -cvx; }
         if(cy < MARGIN) { cy = MARGIN; cvy = -cvy; }
         if(cy > SCREEN_H - MARGIN) { cy = SCREEN_H - MARGIN; cvy = -cvy; }
 
-
+        // Clear screen
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
 
-
-        // Update and draw particles
+        // Draw and update particles
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
         for(auto &p : particles) {
             float dx = cx - p.x;
             float dy = cy - p.y;
-            float dist2 = dx*dx + dy*dy + 100.0f;
+            float dist2 = dx*dx + dy*dy + 100.0f; // softening
             float invd = 1.0f / std::sqrt(dist2);
-            float ax = G * dx * invd / dist2;
-            float ay = G * dy * invd / dist2;
-
-            // Small random noise
-            ax += ((rand() / (float)RAND_MAX) - 0.5f) * 0.01f;
-            ay += ((rand() / (float)RAND_MAX) - 0.5f) * 0.01f;
+            float ax = G * dx * invd / dist2 + ((rand() / (float)RAND_MAX) - 0.5f) * 0.01f;
+            float ay = G * dy * invd / dist2 + ((rand() / (float)RAND_MAX) - 0.5f) * 0.01f;
 
             p.vx = (p.vx + ax) * DAMP;
             p.vy = (p.vy + ay) * DAMP;
             p.x += p.vx;
             p.y += p.vy;
 
-            // Keep particle in screen with smooth respawn
+            // Track time near gravity point
+            if(std::sqrt(dx*dx + dy*dy) < NEAR_RADIUS)
+                p.nearTime += DELTA_TIME;
+            else
+                p.nearTime = 0.0f;
+
+            // Respawn if stuck
+            if(p.nearTime > RESPAWN_TIME) {
+                p.x = rand() % SCREEN_W;
+                p.y = rand() % SCREEN_H;
+                p.vx = ((rand() / (float)RAND_MAX) * 2 - 1);
+                p.vy = ((rand() / (float)RAND_MAX) * 2 - 1);
+                p.nearTime = 0.0f;
+            }
+
+            // Keep particles on screen (smooth respawn if lost)
             if(p.x < -10 || p.x > SCREEN_W+10 || p.y < -10 || p.y > SCREEN_H+10) {
                 p.x = rand() % SCREEN_W;
                 p.y = rand() % SCREEN_H;
                 p.vx = ((rand() / (float)RAND_MAX) * 2 - 1);
                 p.vy = ((rand() / (float)RAND_MAX) * 2 - 1);
+                p.nearTime = 0.0f;
             }
 
             SDL_RenderDrawPoint(renderer, (int)p.x, (int)p.y);
         }
 
         SDL_RenderPresent(renderer);
-        SDL_Delay(16); // ~60 FPS
+        SDL_Delay(DELTA_TIME * 1000); // ~60 FPS
     }
 
     SDL_DestroyRenderer(renderer);
