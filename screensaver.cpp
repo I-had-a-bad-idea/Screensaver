@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
 
     SDL_Init(SDL_INIT_VIDEO);
     SDL_Window* window = SDL_CreateWindow("Gravity Particles",
-                                          SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+                                          SDL_WINDOWPOS_CENTERED, SDL_WINDOW_MAXIMIZED,
                                           SCREEN_W, SCREEN_H, SDL_WINDOW_FULLSCREEN);
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
@@ -53,8 +53,8 @@ int main(int argc, char* argv[]) {
 
     // Gravity point
     float cx = SCREEN_W / 2.0f, cy = SCREEN_H / 2.0f;
-    float cvx = ((rand() / (float)RAND_MAX) * 6 - 3);
-    float cvy = ((rand() / (float)RAND_MAX) * 6 - 3);
+    float cvx = ((rand() / (float)RAND_MAX) * 6 - 1);
+    float cvy = ((rand() / (float)RAND_MAX) * 6 - 1);
 
     bool running = true;
     SDL_Event event;
@@ -93,7 +93,7 @@ int main(int argc, char* argv[]) {
             p.x += p.vx;
             p.y += p.vy;
 
-            // Track time near gravity point
+            // Track time near gravity point 
             if (std::sqrt(dx * dx + dy * dy) < NEAR_RADIUS)
                 p.nearTime += DELTA_TIME;
             else
@@ -120,7 +120,7 @@ int main(int argc, char* argv[]) {
 
         // Color cycling over time
         float t = SDL_GetTicks() * 0.001f; // time in seconds
-        int r = (int)(128 + 127 * std::sin(t * 0.5f));
+        int r = (int)(128 + 127 * std::sin(t * 0.5f) + 3);
         int g = (int)(128 + 127 * std::sin(t * 0.65f + 2));
         int b = (int)(128 + 127 * std::sin(t * 0.35f + 4));
         SDL_SetRenderDrawColor(renderer, r, g, b, 255);
