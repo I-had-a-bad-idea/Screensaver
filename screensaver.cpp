@@ -12,8 +12,16 @@ struct Particle {
 };
 
 int main(int argc, char* argv[]) {
+        if (argc < 2) {
+        printf("Usage: %s <num_particles>\n", argv[0]);
+        return 1;
+    }
 
-    const int NUM_PARTICLES = 10000; // particle count
+    int NUM_PARTICLES = std::atoi(argv[1]);
+    if (NUM_PARTICLES <= 0) {
+        printf("Error: Number of particles must be a positive integer.\n");
+        return 1;
+    }
     const float G = 500.0f;
     const float DAMP = 0.99f;
     const float NEAR_RADIUS = 10.0f; // radius for respawn check
@@ -107,8 +115,13 @@ int main(int argc, char* argv[]) {
                 p.nearTime = 0.0f;
             }
 
-            SDL_RenderDrawPoint(renderer, (int)p.x, (int)p.y);
         }
+        std::vector<SDL_Point> sdlPoints;
+        sdlPoints.reserve(particles.size());
+            for (const auto& p : particles) {
+                sdlPoints.push_back({(int)p.x, (int)p.y});
+            }
+            SDL_RenderDrawPoints(renderer, sdlPoints.data(), sdlPoints.size());
 
         SDL_RenderPresent(renderer);
         SDL_Delay(DELTA_TIME * 1000); // ~60 FPS
