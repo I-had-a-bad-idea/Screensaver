@@ -37,6 +37,7 @@ int main(int argc, char* argv[]) {
 
     const float G = 500.0f;
     const float DAMP = 0.99f;
+    const float MAX_GRAVITY_DISTANCE = 100000.0f;
     const float NEAR_RADIUS = 10.0f;
     const float RESPAWN_TIME = 0.5f;
     const float DELTA_TIME = 0.016f; // ~60 FPS
@@ -48,7 +49,7 @@ int main(int argc, char* argv[]) {
     SDL_Window* window = SDL_CreateWindow("Gravity Particles",
                                           SDL_WINDOWPOS_CENTERED, SDL_WINDOW_MAXIMIZED,
                                           SCREEN_W, SCREEN_H, SDL_WINDOW_FULLSCREEN);
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
     // Enable blending for trail effect
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
@@ -58,6 +59,7 @@ int main(int argc, char* argv[]) {
     // Initialize particles
     std::vector<Particle> particles(NUM_PARTICLES);
     std::vector<GravityPoint> gravity_points(NUMBER_GRAVITY_POINTS);
+    std::vector<SDL_Point> sdlPoints(particles.size());
     for(auto &p : particles) {
         p.x = rand() % SCREEN_W;
         p.y = rand() % SCREEN_H;
@@ -101,18 +103,24 @@ int main(int argc, char* argv[]) {
         SDL_RenderFillRect(renderer, nullptr);
 
         // Update particles
+
         for(auto& p : particles){
             float ax = 0.0f, ay = 0.0f;
             for(auto &g : gravity_points){
                 float dx = g.x - p.x;
                 float dy = g.y - p.y;
                 float dist2 = dx * dx + dy * dy + 100.0f; // Softening
+                
+                if (dist2 > MAX_GRAVITY_DISTANCE){
+                    continue;
+                }
+
                 float invd = 1.0f / std::sqrt(dist2);
                 ax += g.g * dx * invd / dist2 + ((rand() / (float)RAND_MAX) - 0.5f) * 0.01f;
                 ay += g.g * dy * invd / dist2 + ((rand() / (float)RAND_MAX) - 0.5f) * 0.01f;
 
                 // Track time near gravity point 
-                if (std::sqrt(dx * dx + dy * dy) < NEAR_RADIUS){
+                if ((dx * dx + dy * dy) < NEAR_RADIUS * NEAR_RADIUS){
                     p.nearTime += DELTA_TIME;
                 }
             }
@@ -148,10 +156,9 @@ int main(int argc, char* argv[]) {
 
 
         // Prepare and draw points
-        std::vector<SDL_Point> sdlPoints;
-        sdlPoints.reserve(particles.size());
-        for (const auto& p : particles) {
-            sdlPoints.push_back({ (int)p.x, (int)p.y });
+        for (size_t i = 0; i < particles.size(); ++i) {
+            sdlPoints[i].x = (int)particles[i].x;
+            sdlPoints[i].y = (int)particles[i].y;
         }
         SDL_RenderDrawPoints(renderer, sdlPoints.data(), (int)sdlPoints.size());
 
