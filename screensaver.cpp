@@ -102,40 +102,40 @@ int main(int argc, char* argv[]) {
 
         // Update particles
         for(auto& p : particles){
+            float ax = 0.0f, ay = 0.0f;
             for(auto &g : gravity_points){
                 float dx = g.x - p.x;
                 float dy = g.y - p.y;
                 float dist2 = dx * dx + dy * dy + 100.0f; // Softening
                 float invd = 1.0f / std::sqrt(dist2);
-                float ax = g.g * dx * invd / dist2 + ((rand() / (float)RAND_MAX) - 0.5f) * 0.01f;
-                float ay = g.g * dy * invd / dist2 + ((rand() / (float)RAND_MAX) - 0.5f) * 0.01f;
-
-                p.vx = (p.vx + ax) * DAMP;
-                p.vy = (p.vy + ay) * DAMP;
-                p.x += p.vx;
-                p.y += p.vy;
+                ax += g.g * dx * invd / dist2 + ((rand() / (float)RAND_MAX) - 0.5f) * 0.01f;
+                ay += g.g * dy * invd / dist2 + ((rand() / (float)RAND_MAX) - 0.5f) * 0.01f;
 
                 // Track time near gravity point 
                 if (std::sqrt(dx * dx + dy * dy) < NEAR_RADIUS){
                     p.nearTime += DELTA_TIME;
                 }
-                // Respawn if stuck
-                if(p.nearTime > RESPAWN_TIME) {
-                    p.x = rand() % SCREEN_W;
-                    p.y = rand() % SCREEN_H;
-                    p.vx = ((rand() / (float)RAND_MAX) * 2 - 1);
-                    p.vy = ((rand() / (float)RAND_MAX) * 2 - 1);
-                    p.nearTime = 0.0f;
-                }
+            }
+            p.vx = (p.vx + ax) * DAMP;
+            p.vy = (p.vy + ay) * DAMP;
+            p.x += p.vx;
+            p.y += p.vy;
+             // Respawn if stuck
+            if(p.nearTime > RESPAWN_TIME) {
+                p.x = rand() % SCREEN_W;
+                p.y = rand() % SCREEN_H;
+                p.vx = ((rand() / (float)RAND_MAX) * 2 - 1);
+                p.vy = ((rand() / (float)RAND_MAX) * 2 - 1);
+                p.nearTime = 0.0f;
+            }
 
-                // Respawn if offscreen
-                if (p.x < -10 || p.x > SCREEN_W + 10 || p.y < -10 || p.y > SCREEN_H + 10) {
-                    p.x = rand() % SCREEN_W;
-                    p.y = rand() % SCREEN_H;
-                    p.vx = ((rand() / (float)RAND_MAX) * 2 - 1);
-                    p.vy = ((rand() / (float)RAND_MAX) * 2 - 1);
-                    p.nearTime = 0.0f;
-                }
+            // Respawn if offscreen
+            if (p.x < -10 || p.x > SCREEN_W + 10 || p.y < -10 || p.y > SCREEN_H + 10) {
+                p.x = rand() % SCREEN_W;
+                p.y = rand() % SCREEN_H;
+                p.vx = ((rand() / (float)RAND_MAX) * 2 - 1);
+                p.vy = ((rand() / (float)RAND_MAX) * 2 - 1);
+                p.nearTime = 0.0f;
             }
         }
 
