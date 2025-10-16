@@ -11,17 +11,30 @@ struct Particle {
     float nearTime = 0.0f; // seconds near the gravity point
 };
 
+struct GravityPoint {
+    float x, y;
+    float vx, vy;
+    float g; // The gravity of the point
+};
+
 int main(int argc, char* argv[]) {
-    if (argc < 2) {
-        printf("Usage: %s <num_particles>\n", argv[0]);
+    if (argc < 3) {
+        printf("Usage: %s <num_gravity_points> <num_particles>\n", argv[0]);
         return 1;
     }
 
-    int NUM_PARTICLES = std::atoi(argv[1]);
+    int NUMBER_GRAVITY_POINTS = std::atoi(argv[1]);
+    if (NUMBER_GRAVITY_POINTS <= 0){
+        printf("Error: Number of gravity points must be a positive integer. \n");
+        return 1;
+    }
+
+    int NUM_PARTICLES = std::atoi(argv[2]);
     if (NUM_PARTICLES <= 0) {
         printf("Error: Number of particles must be a positive integer.\n");
         return 1;
     }
+
     const float G = 500.0f;
     const float DAMP = 0.99f;
     const float NEAR_RADIUS = 10.0f;
@@ -44,6 +57,7 @@ int main(int argc, char* argv[]) {
 
     // Initialize particles
     std::vector<Particle> particles(NUM_PARTICLES);
+    std::vector<GravityPoint> gravity_points(NUMBER_GRAVITY_POINTS);
     for(auto &p : particles) {
         p.x = rand() % SCREEN_W;
         p.y = rand() % SCREEN_H;
@@ -51,10 +65,14 @@ int main(int argc, char* argv[]) {
         p.vy = ((rand() / (float)RAND_MAX) * 2 - 1);
     }
 
-    // Gravity point
-    float cx = SCREEN_W / 2.0f, cy = SCREEN_H / 2.0f;
-    float cvx = ((rand() / (float)RAND_MAX) * 6 - 1);
-    float cvy = ((rand() / (float)RAND_MAX) * 6 - 1);
+    // Gravity points
+    for(auto &g : gravity_points){
+        g.x = SCREEN_W / 2.0f;
+        g.y = SCREEN_H / 2.0f;
+        g.vx = ((rand() / (float)RAND_MAX) * 6 - 1);
+        g.vy = ((rand() / (float)RAND_MAX) * 6 - 1);
+        g.g = ((rand() / (float)RAND_MAX) * G);
+    }
 
     bool running = true;
     SDL_Event event;
@@ -65,15 +83,18 @@ int main(int argc, char* argv[]) {
                 running = false;
         }
 
-        // Move gravity point
-        cx += cvx;
-        cy += cvy;
+        // Move gravity points
+        for(auto &g : gravity_points){
+            g.x += g.vx;
+            g.y += g.vy;
+                    // Bounce off screen edges
+            if(g.x < MARGIN) { g.x = MARGIN; g.vx = -g.vx; }
+            if(g.x > SCREEN_W - MARGIN) { g.x = SCREEN_W - MARGIN; g.vx = -g.vx; }
+            if(g.y < MARGIN) { g.y = MARGIN; g.vy = -g.vy; }
+            if(g.y > SCREEN_H - MARGIN) { g.y = SCREEN_H - MARGIN; g.vy = -g.vy; }
+        }
 
-        // Bounce off screen edges
-        if(cx < MARGIN) { cx = MARGIN; cvx = -cvx; }
-        if(cx > SCREEN_W - MARGIN) { cx = SCREEN_W - MARGIN; cvx = -cvx; }
-        if(cy < MARGIN) { cy = MARGIN; cvy = -cvy; }
-        if(cy > SCREEN_H - MARGIN) { cy = SCREEN_H - MARGIN; cvy = -cvy; }
+
 
         // Motion trail: fade screen instead of clearing it
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 25); // Low alpha = long trails
@@ -81,48 +102,48 @@ int main(int argc, char* argv[]) {
 
         // Update particles
         for(auto& p : particles){
-            float dx = cx - p.x;
-            float dy = cy - p.y;
-            float dist2 = dx * dx + dy * dy + 100.0f; // Softening
-            float invd = 1.0f / std::sqrt(dist2);
-            float ax = G * dx * invd / dist2 + ((rand() / (float)RAND_MAX) - 0.5f) * 0.01f;
-            float ay = G * dy * invd / dist2 + ((rand() / (float)RAND_MAX) - 0.5f) * 0.01f;
+            for(auto &g : gravity_points){
+                float dx = g.x - p.x;
+                float dy = g.y - p.y;
+                float dist2 = dx * dx + dy * dy + 100.0f; // Softening
+                float invd = 1.0f / std::sqrt(dist2);
+                float ax = g.g * dx * invd / dist2 + ((rand() / (float)RAND_MAX) - 0.5f) * 0.01f;
+                float ay = g.g * dy * invd / dist2 + ((rand() / (float)RAND_MAX) - 0.5f) * 0.01f;
 
-            p.vx = (p.vx + ax) * DAMP;
-            p.vy = (p.vy + ay) * DAMP;
-            p.x += p.vx;
-            p.y += p.vy;
+                p.vx = (p.vx + ax) * DAMP;
+                p.vy = (p.vy + ay) * DAMP;
+                p.x += p.vx;
+                p.y += p.vy;
 
-            // Track time near gravity point 
-            if (std::sqrt(dx * dx + dy * dy) < NEAR_RADIUS)
-                p.nearTime += DELTA_TIME;
-            else
-                p.nearTime = 0.0f;
+                // Track time near gravity point 
+                if (std::sqrt(dx * dx + dy * dy) < NEAR_RADIUS){
+                    p.nearTime += DELTA_TIME;
+                }
+                // Respawn if stuck
+                if(p.nearTime > RESPAWN_TIME) {
+                    p.x = rand() % SCREEN_W;
+                    p.y = rand() % SCREEN_H;
+                    p.vx = ((rand() / (float)RAND_MAX) * 2 - 1);
+                    p.vy = ((rand() / (float)RAND_MAX) * 2 - 1);
+                    p.nearTime = 0.0f;
+                }
 
-            // Respawn if stuck
-            if(p.nearTime > RESPAWN_TIME) {
-                p.x = rand() % SCREEN_W;
-                p.y = rand() % SCREEN_H;
-                p.vx = ((rand() / (float)RAND_MAX) * 2 - 1);
-                p.vy = ((rand() / (float)RAND_MAX) * 2 - 1);
-                p.nearTime = 0.0f;
-            }
-
-            // Respawn if offscreen
-            if (p.x < -10 || p.x > SCREEN_W + 10 || p.y < -10 || p.y > SCREEN_H + 10) {
-                p.x = rand() % SCREEN_W;
-                p.y = rand() % SCREEN_H;
-                p.vx = ((rand() / (float)RAND_MAX) * 2 - 1);
-                p.vy = ((rand() / (float)RAND_MAX) * 2 - 1);
-                p.nearTime = 0.0f;
+                // Respawn if offscreen
+                if (p.x < -10 || p.x > SCREEN_W + 10 || p.y < -10 || p.y > SCREEN_H + 10) {
+                    p.x = rand() % SCREEN_W;
+                    p.y = rand() % SCREEN_H;
+                    p.vx = ((rand() / (float)RAND_MAX) * 2 - 1);
+                    p.vy = ((rand() / (float)RAND_MAX) * 2 - 1);
+                    p.nearTime = 0.0f;
+                }
             }
         }
 
         // Color cycling over time
         float t = SDL_GetTicks() * 0.001f; // time in seconds
-        int r = (int)(128 + 127 * std::sin(t * 0.5f) + 3);
-        int g = (int)(128 + 127 * std::sin(t * 0.65f + 2));
-        int b = (int)(128 + 127 * std::sin(t * 0.35f + 4));
+        int r = (int)(128 + 127 * std::sin(t * 0.5));
+        int g = (int)(128 + 127 * std::sin(t * 0.1));
+        int b = (int)(128 + 127 * std::sin(t * 0.9));
         SDL_SetRenderDrawColor(renderer, r, g, b, 255);
 
 
