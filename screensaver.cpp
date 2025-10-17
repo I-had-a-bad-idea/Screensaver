@@ -41,16 +41,22 @@ int main(int argc, char* argv[]) {
     const float NEAR_RADIUS = 10.0f;
     const float RESPAWN_TIME = 0.5f;
     const float DELTA_TIME = 0.016f; // ~60 FPS
-    const int SCREEN_W = 1920;
-    const int SCREEN_H = 1080;
     const float MARGIN = 5.0f;
 
     SDL_Init(SDL_INIT_VIDEO);
-    SDL_Window* window = SDL_CreateWindow("Gravity Particles",
-                                          SDL_WINDOWPOS_CENTERED, SDL_WINDOW_MAXIMIZED,
-                                          SCREEN_W, SCREEN_H, SDL_WINDOW_FULLSCREEN);
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
+    // Get actual display resolution
+    SDL_DisplayMode displayMode;
+    SDL_GetCurrentDisplayMode(0, &displayMode);
+    int SCREEN_W = displayMode.w;
+    int SCREEN_H = displayMode.h;
+
+    SDL_Window* window = SDL_CreateWindow("Gravity Particles",
+                                        SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+                                        0, 0, SDL_WINDOW_FULLSCREEN_DESKTOP);
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    SDL_SetRelativeMouseMode(SDL_TRUE);
+    
     // Enable blending for trail effect
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
@@ -168,6 +174,7 @@ int main(int argc, char* argv[]) {
 
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
+    SDL_SetRelativeMouseMode(SDL_FALSE);
     SDL_Quit();
     return 0;
 }

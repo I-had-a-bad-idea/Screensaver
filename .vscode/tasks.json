@@ -27,7 +27,7 @@
                 
 //                "-fprofile-generate",  // Profiling build
 //                "-fprofile-use",  // Use the generated profile for final optimizations
-                "${fileDirname}\\Screensaver.exe"
+                "${fileDirname}\\Screensaver.scr"
             ],
             "options": {
                 "cwd": "${fileDirname}"
