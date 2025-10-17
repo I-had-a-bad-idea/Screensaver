@@ -31,6 +31,8 @@ C:\msys64\ucrt64\bin\g++.exe -O3 -ffast-math -fopenmp -flto -DNDEBUG -s -I C:/ms
 
 Alternatively run the VS Code task named "C/C++: g++.exe build active file with SDL (Release)" from the Run/Tasks menu.
 
+Right click on the binary, and choose install. Now it is configured as the standard screensaver.
+
 ## Run
 
 - The compiled binary opens in fullscreen and runs until you press any key, click the mouse, or close the window.
