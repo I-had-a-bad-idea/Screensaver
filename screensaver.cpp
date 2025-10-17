@@ -87,7 +87,7 @@ int main(int argc, char* argv[]) {
 
     while(running) {
         while(SDL_PollEvent(&event)) {
-            if(event.type == SDL_QUIT || event.type == SDL_KEYDOWN)
+            if(event.type == SDL_QUIT || event.type == SDL_KEYDOWN || event.type == SDL_MOUSEBUTTONDOWN)
                 running = false;
         }
 
