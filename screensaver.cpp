@@ -18,21 +18,21 @@ struct GravityPoint {
 };
 
 int main(int argc, char* argv[]) {
-    if (argc < 3) {
-        printf("Usage: %s <num_gravity_points> <num_particles>\n", argv[0]);
-        return 1;
-    }
+    int NUMBER_GRAVITY_POINTS = 5;
+    int NUM_PARTICLES = 25000;
+    if (argc == 3) {
+        
+        NUMBER_GRAVITY_POINTS = std::atoi(argv[1]);
+        if (NUMBER_GRAVITY_POINTS <= 0){
+            printf("Error: Number of gravity points must be a positive integer. \n");
+            return 1;
+        }
 
-    int NUMBER_GRAVITY_POINTS = std::atoi(argv[1]);
-    if (NUMBER_GRAVITY_POINTS <= 0){
-        printf("Error: Number of gravity points must be a positive integer. \n");
-        return 1;
-    }
-
-    int NUM_PARTICLES = std::atoi(argv[2]);
-    if (NUM_PARTICLES <= 0) {
-        printf("Error: Number of particles must be a positive integer.\n");
-        return 1;
+        NUM_PARTICLES = std::atoi(argv[2]);
+        if (NUM_PARTICLES <= 0) {
+            printf("Error: Number of particles must be a positive integer.\n");
+            return 1;
+        }
     }
 
     const float G = 500.0f;
