@@ -12,6 +12,8 @@ The program simulates particles that are attracted to several moving "gravity po
 - Color cycling over time
 - Lightweight single-file implementation: `screensaver.cpp`
 
+<img src="Screenshot.png" alt="Image" width="700" height="400">
+
 ## Dependencies
 
 - Install SDL2 (development) and ensure the include/lib paths are available to your compiler.
