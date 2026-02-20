@@ -27,6 +27,8 @@ struct Config {
     int color_r = 255;
     int color_g = 255;
     int color_b = 255;
+
+    int trail_alpha = 25;
 };
 
 Config load_config(const std::string& path) {
@@ -52,16 +54,21 @@ Config load_config(const std::string& path) {
                 config.gravity_points = v;
             } else if (key == "particles" && v > 0) {
                 config.particles = v;
+            
             } else if (key == "cycle_color" && v == 1) {
                 config.cycle_color = true;
             } else if (key == "cycle_color" && v == 0) {
                 config.cycle_color = false;
+            
             } else if (key == "color_r" && v >= 0 && v <= 255) {
                 config.color_r = v;
             } else if (key == "color_g" && v >= 0 && v <= 255) {
                 config.color_g = v;
             } else if (key == "color_b" && v >= 0 && v <= 255) {
                 config.color_b = v;
+            
+            } else if (key == "trail_alpha" && v >= 0 && v <= 255) {
+                config.trail_alpha = v;
             }
         } catch (...) {
             // Ignore invalid values
@@ -143,7 +150,8 @@ int main(int argc, char* argv[]) {
 
 
         // Motion trail: fade screen instead of clearing it
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 25); // Low alpha = long trails
+        // Low alpha = long trails
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, config.trail_alpha);
         SDL_RenderFillRect(renderer, nullptr);
 
         // Update particles
@@ -197,9 +205,9 @@ int main(int argc, char* argv[]) {
         if (config.cycle_color) {
             // Color cycling over time
             float t = SDL_GetTicks() * 0.001f; // time in seconds
-            int r = (int)(128 + 127 * std::sin(t * 0.5));
-            int g = (int)(128 + 127 * std::sin(t * 0.1));
-            int b = (int)(128 + 127 * std::sin(t * 0.9));
+            r = (int)(128 + 127 * std::sin(t * 0.5));
+            g = (int)(128 + 127 * std::sin(t * 0.1));
+            b = (int)(128 + 127 * std::sin(t * 0.9));
         } else {
             r = config.color_r;
             g = config.color_g;
