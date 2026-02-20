@@ -22,6 +22,11 @@ struct GravityPoint {
 struct Config {
     int gravity_points = 5;
     int particles = 25000;
+
+    bool cycle_color = true;
+    int color_r = 255;
+    int color_g = 255;
+    int color_b = 255;
 };
 
 Config load_config(const std::string& path) {
@@ -47,6 +52,16 @@ Config load_config(const std::string& path) {
                 config.gravity_points = v;
             } else if (key == "particles" && v > 0) {
                 config.particles = v;
+            } else if (key == "cycle_color" && v == 1) {
+                config.cycle_color = true;
+            } else if (key == "cycle_color" && v == 0) {
+                config.cycle_color = false;
+            } else if (key == "color_r" && v >= 0 && v <= 255) {
+                config.color_r = v;
+            } else if (key == "color_g" && v >= 0 && v <= 255) {
+                config.color_g = v;
+            } else if (key == "color_b" && v >= 0 && v <= 255) {
+                config.color_b = v;
             }
         } catch (...) {
             // Ignore invalid values
