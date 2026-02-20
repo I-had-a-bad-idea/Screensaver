@@ -29,6 +29,9 @@ struct Config {
     int color_b = 255;
 
     int trail_alpha = 25;
+
+    float g = 500.0f;
+    float damp = 0.99f;
 };
 
 Config load_config(const std::string& path) {
@@ -69,6 +72,11 @@ Config load_config(const std::string& path) {
             
             } else if (key == "trail_alpha" && v >= 0 && v <= 255) {
                 config.trail_alpha = v;
+            
+            } else if (key == "g" && v > 0) {
+                config.g = v;
+            } else if (key == "damp" && v >= 0 && v <= 100) {
+                config.damp = v / 100.0f;
             }
         } catch (...) {
             // Ignore invalid values
@@ -80,8 +88,6 @@ Config load_config(const std::string& path) {
 int main(int argc, char* argv[]) {
     Config config = load_config("screensaver.config");
 
-    const float G = 500.0f;
-    const float DAMP = 0.99f;
     const float MAX_GRAVITY_DISTANCE = 100000.0f;
     const float NEAR_RADIUS = 10.0f;
     const float RESPAWN_TIME = 0.5f;
@@ -124,7 +130,7 @@ int main(int argc, char* argv[]) {
         g.y = SCREEN_H / 2.0f;
         g.vx = ((rand() / (float)RAND_MAX) * 6 - 1);
         g.vy = ((rand() / (float)RAND_MAX) * 6 - 1);
-        g.g = ((rand() / (float)RAND_MAX) * G);
+        g.g = ((rand() / (float)RAND_MAX) * config.g);
     }
 
     bool running = true;
@@ -176,8 +182,8 @@ int main(int argc, char* argv[]) {
                     p.nearTime += DELTA_TIME;
                 }
             }
-            p.vx = (p.vx + ax) * DAMP;
-            p.vy = (p.vy + ay) * DAMP;
+            p.vx = (p.vx + ax) * config.damp;
+            p.vy = (p.vy + ay) * config.damp;
             p.x += p.vx;
             p.y += p.vy;
              // Respawn if stuck
