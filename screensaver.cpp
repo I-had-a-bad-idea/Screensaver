@@ -72,8 +72,6 @@ Config load_config(const std::string& path) {
 
 int main(int argc, char* argv[]) {
     Config config = load_config("screensaver.config");
-    int NUMBER_GRAVITY_POINTS = config.gravity_points;
-    int NUM_PARTICLES = config.particles;
 
     const float G = 500.0f;
     const float DAMP = 0.99f;
@@ -103,8 +101,8 @@ int main(int argc, char* argv[]) {
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
     // Initialize particles
-    std::vector<Particle> particles(NUM_PARTICLES);
-    std::vector<GravityPoint> gravity_points(NUMBER_GRAVITY_POINTS);
+    std::vector<Particle> particles(config.particles);
+    std::vector<GravityPoint> gravity_points(config.gravity_points);
     std::vector<SDL_Point> sdlPoints(particles.size());
     for(auto &p : particles) {
         p.x = rand() % SCREEN_W;
@@ -192,12 +190,21 @@ int main(int argc, char* argv[]) {
                 p.nearTime = 0.0f;
             }
         }
+        
+        // Colors
+        int r, g, b;
 
-        // Color cycling over time
-        float t = SDL_GetTicks() * 0.001f; // time in seconds
-        int r = (int)(128 + 127 * std::sin(t * 0.5));
-        int g = (int)(128 + 127 * std::sin(t * 0.1));
-        int b = (int)(128 + 127 * std::sin(t * 0.9));
+        if (config.cycle_color) {
+            // Color cycling over time
+            float t = SDL_GetTicks() * 0.001f; // time in seconds
+            int r = (int)(128 + 127 * std::sin(t * 0.5));
+            int g = (int)(128 + 127 * std::sin(t * 0.1));
+            int b = (int)(128 + 127 * std::sin(t * 0.9));
+        } else {
+            r = config.color_r;
+            g = config.color_g;
+            b = config.color_b;
+        }
         SDL_SetRenderDrawColor(renderer, r, g, b, 255);
 
 
