@@ -69,9 +69,19 @@ color_r=0
 color_g=255
 color_b=0
 trail_alpha=10
+g=500
+damp=99
 ```
 
-
+Only int values are supported in the config file, and all parameters have defaults if not specified.
+Possible values:
+- `gravity_points`: number of gravity points `>0`
+- `particles`: number of particles to simulate `>0`
+- `cycle_color`: `0` or `1`, whether to cycle particle colors over time
+- `color_r`, `color_g`, `color_b`: base RGB color values (`0-255`) used when `cycle_color=0`
+- `trail_alpha`: alpha value (`0-255`) for the fading trail effect (lower means longer trails)
+- `g`: gravitational constant controlling attraction strength (higher means stronger attraction)
+- `damp`: velocity retention percentage (`0-100`), simulating friction (lower means more damping)
 
 ## Run
 
