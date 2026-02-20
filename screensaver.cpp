@@ -4,6 +4,8 @@
 #include <cmath>
 #include <ctime>
 #include <algorithm>
+#include <fstream>
+#include <string>
 
 struct Particle {
     float x, y;
@@ -16,6 +18,42 @@ struct GravityPoint {
     float vx, vy;
     float g; // The gravity of the point
 };
+
+struct Config {
+    int gravity_points = 5;
+    int particles = 25000;
+};
+
+Config load_config(const std::string& path) {
+    Config config;
+    std::ifstream file(path);
+
+    if (!file.is_open()) {
+        printf("Config file not found. Using defaults.\n");
+        return config;
+    }
+
+    std::string line;
+    while (std::getline(file, line)) {
+        size_t eq = line.find("=");
+        if (eq == std::string::npos) continue;
+
+        std::string key = line.substr(0, eq);
+        std::string value = line.substr(eq + 1);
+
+        try {
+            int v = std::stoi(value);
+            if (key == "gravity_points" && v > 0) {
+                config.gravity_points = v;
+            } else if (key == "particles" && v > 0) {
+                config.particles = v;
+            }
+        } catch (...) {
+            // Ignore invalid values
+        }
+    }
+    return config;
+}
 
 int main(int argc, char* argv[]) {
     int NUMBER_GRAVITY_POINTS = 5;
