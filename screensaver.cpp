@@ -32,6 +32,9 @@ struct Config {
 
     float g = 500.0f;
     float damp = 0.99f;
+
+    int near_radius = 10;
+    float respawn_time = 0.5f;
 };
 
 Config load_config(const std::string& path) {
@@ -76,7 +79,12 @@ Config load_config(const std::string& path) {
             } else if (key == "g" && v > 0) {
                 config.g = v;
             } else if (key == "damp" && v >= 0 && v <= 100) {
-                config.damp = v / 100.0f;
+                config.damp = v / 100.0f; // It is specified in procent
+            
+            } else if (key == "near_radius" && v >= 0) {
+                config.near_radius = v;
+            } else if (key == "respawn_time" && v >= 0) {
+                config.respawn_time = v / 1000.0f; // It is in milliseconds
             }
         } catch (...) {
             // Ignore invalid values
@@ -89,8 +97,6 @@ int main(int argc, char* argv[]) {
     Config config = load_config("screensaver.config");
 
     const float MAX_GRAVITY_DISTANCE = 100000.0f;
-    const float NEAR_RADIUS = 10.0f;
-    const float RESPAWN_TIME = 0.5f;
     const float DELTA_TIME = 0.016f; // ~60 FPS
     const float MARGIN = 5.0f;
 
@@ -178,7 +184,7 @@ int main(int argc, char* argv[]) {
                 ay += g.g * dy * invd / dist2 + ((rand() / (float)RAND_MAX) - 0.5f) * 0.01f;
 
                 // Track time near gravity point 
-                if ((dx * dx + dy * dy) < NEAR_RADIUS * NEAR_RADIUS){
+                if ((dx * dx + dy * dy) < config.near_radius * config.near_radius){
                     p.nearTime += DELTA_TIME;
                 }
             }
@@ -187,7 +193,7 @@ int main(int argc, char* argv[]) {
             p.x += p.vx;
             p.y += p.vy;
              // Respawn if stuck
-            if(p.nearTime > RESPAWN_TIME) {
+            if(p.nearTime > config.respawn_time) {
                 p.x = rand() % SCREEN_W;
                 p.y = rand() % SCREEN_H;
                 p.vx = ((rand() / (float)RAND_MAX) * 2 - 1);

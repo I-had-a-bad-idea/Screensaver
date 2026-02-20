@@ -71,6 +71,8 @@ color_b=0
 trail_alpha=10
 g=500
 damp=99
+near_radius=10
+respawn_time=500
 ```
 
 Only int values are supported in the config file, and all parameters have defaults if not specified.
@@ -82,6 +84,8 @@ Possible values:
 - `trail_alpha`: alpha value (`0-255`) for the fading trail effect (lower means longer trails)
 - `g`: gravitational constant controlling attraction strength (higher means stronger attraction)
 - `damp`: velocity retention percentage (`0-100`), simulating friction (lower means more damping)
+- `near_radius`: distance threshold for particles to be considered "stuck" to a gravity point
+- `respawn_time`: time in milliseconds after which a particle that has stuck to a gravity point will respawn at a random position with a random velocity
 
 ## Run
 
@@ -102,10 +106,10 @@ Tune the following parameters in `screensaver.config` to balance visual quality 
 - The code is compiled with optimizations in the provided build task (`-O3 -flto -ffast-math`) and uses `SDL_RENDERER_ACCELERATED` with vsync.
 - If the renderer is slow on your system, try reducing particles/gravity points or disabling vsync in the renderer creation flags.
 
-Suggested edits to experiment with (currently not exposed via config):
+Suggested edits to experiment with:
 - Reduce `particles` (e.g., 10000) or `gravity_points` (e.g., 2) for better frame rates.
-- Increase `NEAR_RADIUS` and `RESPAWN_TIME` to change how particles stick to gravity points.
-- Tweak `G` and `DAMP` constants in `screensaver.cpp` to change attraction strength and damping.
+- Change `near_radius` and `respawn_time` to change how particles stick to gravity points.
+- Tweak `g` and `damp` constants in `screensaver.config` to change attraction strength and damping.
 
 ## Troubleshooting
 
