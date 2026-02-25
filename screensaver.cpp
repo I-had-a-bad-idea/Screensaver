@@ -35,6 +35,8 @@ struct Config {
 
     int near_radius = 10;
     float respawn_time = 0.5f;
+
+    int max_gravity_distance = 300;
 };
 
 Config load_config(const std::string& path) {
@@ -85,6 +87,9 @@ Config load_config(const std::string& path) {
                 config.near_radius = v;
             } else if (key == "respawn_time" && v >= 0) {
                 config.respawn_time = v / 1000.0f; // It is in milliseconds
+            
+            } else if (key == "max_gravity_distance" && v > 0) {
+                config.max_gravity_distance = v;
             }
         } catch (...) {
             // Ignore invalid values
@@ -96,7 +101,7 @@ Config load_config(const std::string& path) {
 int main(int argc, char* argv[]) {
     Config config = load_config("screensaver.config");
 
-    const float MAX_GRAVITY_DISTANCE = 100000.0f;
+    const int MAX_GRAVITY_DISTANCE = config.max_gravity_distance * config.max_gravity_distance; // Squared for distance comparison
     const float DELTA_TIME = 0.016f; // ~60 FPS
     const float MARGIN = 5.0f;
 

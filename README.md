@@ -1,8 +1,6 @@
 # Screensaver
 
-A simple fullscreen particle-based screensaver written in C++ using SDL2.
-
-The program simulates particles that are attracted to several moving "gravity points", producing colorful motion trails. It is configured for high particle counts and uses blending + a fading render pass to produce smooth trails.
+A simple particle system screensaver implemented in C++ using SDL2. Particles are attracted to configurable gravity points, creating dynamic swirling patterns with motion trails. Fully configurable via a simple text config file.
 
 <img src="Screenshot.png" alt="Image" width="700" height="400">
 
@@ -12,8 +10,9 @@ The program simulates particles that are attracted to several moving "gravity po
 	- [Features](#features)
 	- [Installation](#installation)
 		- [Dependencies](#dependencies)
-		- [Getting the binary](#getting-the-binary)
-		- [Build (Windows / PowerShell)](#build-windows--powershell)
+		- [Binary](#binary)
+			- [Releases](#releases)
+			- [Build (Windows / PowerShell)](#build-windows--powershell)
 		- [Configuration](#configuration)
 	- [Run](#run)
 	- [Controls](#controls)
@@ -39,12 +38,16 @@ The program simulates particles that are attracted to several moving "gravity po
 
 The project does not use external build tools; it compiles with g++.
 
-### Getting the binary
+### Binary
 
 You can either build the screensaver from source (see below) or download a precompiled binary from the releases page.
 Right click on the binary, and choose install. It is now configured as the standard screensaver.
 
-### Build (Windows / PowerShell)
+#### Releases
+
+Release binaries will be provided in the "Releases" section of this repository. Look for the latest release and download the appropriate binary for your system (e.g., `Screensaver.scr` for Windows). The latest release can be found [here](https://github.com/I-had-a-bad-idea/Screensaver/releases/latest)
+
+#### Build (Windows / PowerShell)
 
 This repository includes a VS Code build task that uses a MinGW/MSYS g++ toolchain to compile the active file with SDL2 and produce a screensaver executable (`.scr`). It expects SDL2 headers/libs installed under your MSYS/MinGW installation (the task uses `C:\msys64\mingw64` paths by default).
 
@@ -73,6 +76,7 @@ g=500
 damp=99
 near_radius=10
 respawn_time=500
+max_gravity_distance=300
 ```
 
 Only int values are supported in the config file, and all parameters have defaults if not specified.
@@ -86,6 +90,7 @@ Possible values:
 - `damp`: velocity retention percentage (`0-100`), simulating friction (lower means more damping)
 - `near_radius`: distance threshold for particles to be considered "stuck" to a gravity point
 - `respawn_time`: time in milliseconds after which a particle that has stuck to a gravity point will respawn at a random position with a random velocity
+- `max_gravity_distance`: maximum distance at which gravity points affect particles (in pixels). Particles farther than this distance from a gravity point will not be affected by its gravity. This can help improve performance by ignoring distant gravity points.
 
 ## Run
 
@@ -99,17 +104,16 @@ Possible values:
 
 ## Tuning & Performance
 
-Tune the following parameters in `screensaver.config` to balance visual quality and performance on your system:
+Tune the following parameters in `screensaver.config` to balance visual quality/complexity and performance on your system:
 
+- `max_gravity_distance` can significantly improve performance by ignoring gravity points that are too far from particles. Adjust this based on your display size and desired visual effect.
 - `particles` mainly controls workload. Lower the number for slower/older hardware.
 - `gravity_points` changes visual complexity. Reduce to increase speed.
 - The code is compiled with optimizations in the provided build task (`-O3 -flto -ffast-math`) and uses `SDL_RENDERER_ACCELERATED` with vsync.
-- If the renderer is slow on your system, try reducing particles/gravity points or disabling vsync in the renderer creation flags.
-
+- 
 Suggested edits to experiment with:
 - Reduce `particles` (e.g., 10000) or `gravity_points` (e.g., 2) for better frame rates.
-- Change `near_radius` and `respawn_time` to change how particles stick to gravity points.
-- Tweak `g` and `damp` constants in `screensaver.config` to change attraction strength and damping.
+- Adjust `max_gravity_distance` to a smaller value (e.g., 200) to further improve performance, especially with many gravity points.	
 
 ## Troubleshooting
 
