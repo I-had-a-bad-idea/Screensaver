@@ -102,6 +102,7 @@ int main(int argc, char* argv[]) {
     Config config = load_config("screensaver.config");
 
     const int MAX_GRAVITY_DISTANCE = config.max_gravity_distance * config.max_gravity_distance; // Squared for distance comparison
+    int NEAR_RADIUS_SQUARED = config.near_radius * config.near_radius; // Squared for distance comparison
     const float DELTA_TIME = 0.016f; // ~60 FPS
     const float MARGIN = 5.0f;
 
@@ -154,7 +155,7 @@ int main(int argc, char* argv[]) {
         }
 
         // Move gravity points
-        for(auto &g : gravity_points){
+        for(GravityPoint &g : gravity_points){
             g.x += g.vx * DELTA_TIME;
             g.y += g.vy * DELTA_TIME;
                     // Bounce off screen edges
@@ -164,8 +165,6 @@ int main(int argc, char* argv[]) {
             if(g.y > SCREEN_H - MARGIN) { g.y = SCREEN_H - MARGIN; g.vy = -g.vy; }
         }
 
-
-
         // Motion trail: fade screen instead of clearing it
         // Low alpha = long trails
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, config.trail_alpha);
@@ -173,23 +172,25 @@ int main(int argc, char* argv[]) {
 
         // Update particles
 
-        for(auto& p : particles){
+        for(Particle& p : particles){
             float ax = 0.0f, ay = 0.0f;
             for(auto &g : gravity_points){
                 float dx = g.x - p.x;
                 float dy = g.y - p.y;
-                float dist2 = dx * dx + dy * dy + 100.0f; // Softening
+                float distance_squared = dx * dx + dy * dy;
+                float dist2 = distance_squared + 100.0f; // Softening
                 
                 if (dist2 > MAX_GRAVITY_DISTANCE){
                     continue;
                 }
 
                 float invd = 1.0f / std::sqrt(dist2);
-                ax += g.g * dx * invd / dist2 + ((rand() / (float)RAND_MAX) - 0.5f) * 0.01f;
-                ay += g.g * dy * invd / dist2 + ((rand() / (float)RAND_MAX) - 0.5f) * 0.01f;
+                float invd3 = invd * invd * invd;
+                ax += g.g * dx * invd3;
+                ay += g.g * dy * invd3;
 
                 // Track time near gravity point 
-                if ((dx * dx + dy * dy) < config.near_radius * config.near_radius){
+                if (distance_squared < NEAR_RADIUS_SQUARED){
                     p.nearTime += DELTA_TIME;
                 }
             }
