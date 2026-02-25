@@ -131,17 +131,17 @@ int main(int argc, char* argv[]) {
     for(auto &p : particles) {
         p.x = rand() % SCREEN_W;
         p.y = rand() % SCREEN_H;
-        p.vx = ((rand() / (float)RAND_MAX) * 2 - 1);
-        p.vy = ((rand() / (float)RAND_MAX) * 2 - 1);
+        p.vx = ((rand() / (float)RAND_MAX) * 2 - 1) * 60;
+        p.vy = ((rand() / (float)RAND_MAX) * 2 - 1) * 60;
     }
 
     // Gravity points
     for(auto &g : gravity_points){
         g.x = SCREEN_W / 2.0f;
         g.y = SCREEN_H / 2.0f;
-        g.vx = ((rand() / (float)RAND_MAX) * 6 - 1);
-        g.vy = ((rand() / (float)RAND_MAX) * 6 - 1);
-        g.g = ((rand() / (float)RAND_MAX) * config.g);
+        g.vx = ((rand() / (float)RAND_MAX) * 2 - 1) * 180;
+        g.vy = ((rand() / (float)RAND_MAX) * 2 - 1) * 180;
+        g.g = ((rand() / (float)RAND_MAX) * config.g * 360) * 7; // Much stronger due to multiplication with delta time
     }
 
     bool running = true;
@@ -155,8 +155,8 @@ int main(int argc, char* argv[]) {
 
         // Move gravity points
         for(auto &g : gravity_points){
-            g.x += g.vx;
-            g.y += g.vy;
+            g.x += g.vx * DELTA_TIME;
+            g.y += g.vy * DELTA_TIME;
                     // Bounce off screen edges
             if(g.x < MARGIN) { g.x = MARGIN; g.vx = -g.vx; }
             if(g.x > SCREEN_W - MARGIN) { g.x = SCREEN_W - MARGIN; g.vx = -g.vx; }
@@ -193,10 +193,10 @@ int main(int argc, char* argv[]) {
                     p.nearTime += DELTA_TIME;
                 }
             }
-            p.vx = (p.vx + ax) * config.damp;
-            p.vy = (p.vy + ay) * config.damp;
-            p.x += p.vx;
-            p.y += p.vy;
+            p.vx = (p.vx + (ax * DELTA_TIME)) * config.damp;
+            p.vy = (p.vy + (ay * DELTA_TIME)) * config.damp;
+            p.x += p.vx * DELTA_TIME;
+            p.y += p.vy * DELTA_TIME;
              // Respawn if stuck
             if(p.nearTime > config.respawn_time) {
                 p.x = rand() % SCREEN_W;
