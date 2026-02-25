@@ -132,8 +132,6 @@ int main(int argc, char* argv[]) {
     for(auto &p : particles) {
         p.x = rand() % SCREEN_W;
         p.y = rand() % SCREEN_H;
-        p.vx = ((rand() / (float)RAND_MAX) * 2 - 1) * 60;
-        p.vy = ((rand() / (float)RAND_MAX) * 2 - 1) * 60;
     }
 
     // Gravity points
