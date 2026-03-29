@@ -39,6 +39,37 @@ struct Config {
     int max_gravity_distance = 300;
 };
 
+
+#if defined(_WIN32)
+#include <windows.h>   // For GetModuleFileNameA
+#include <limits.h>    // For MAX_PATH
+#elif defined(__APPLE__)
+#include <mach-o/dyld.h>
+#elif defined(__linux__)
+#include <unistd.h>
+#endif
+
+std::string get_binary_dir() {
+    std::string path;
+#if defined(_WIN32)
+    char buffer[MAX_PATH];
+    DWORD len = GetModuleFileNameA(nullptr, buffer, MAX_PATH);
+    if (len == 0) return "."; // fallback
+    path = buffer;
+#elif defined(__APPLE__)
+    char buffer[1024];
+    uint32_t size = sizeof(buffer);
+    if (_NSGetExecutablePath(buffer, &size) == 0) path = buffer;
+#elif defined(__linux__)
+    char buffer[1024];
+    ssize_t len = readlink("/proc/self/exe", buffer, sizeof(buffer)-1);
+    if (len != -1) { buffer[len] = '\0'; path = buffer; }
+#endif
+    size_t pos = path.find_last_of("/\\");
+    if (pos != std::string::npos) path = path.substr(0, pos);
+    return path;
+}
+
 Config load_config(const std::string& path) {
     Config config;
     std::ifstream file(path);
@@ -99,7 +130,7 @@ Config load_config(const std::string& path) {
 }
 
 int main(int argc, char* argv[]) {
-    Config config = load_config("screensaver.config");
+    Config config = load_config(get_binary_dir() + "/screensaver.config");
 
     const int MAX_GRAVITY_DISTANCE = config.max_gravity_distance * config.max_gravity_distance; // Squared for distance comparison
     int NEAR_RADIUS_SQUARED = config.near_radius * config.near_radius; // Squared for distance comparison
