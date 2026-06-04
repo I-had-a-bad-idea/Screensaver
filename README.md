@@ -2,24 +2,49 @@
 
 A simple particle system screensaver implemented in C++ using SDL2. Particles are attracted to configurable gravity points, creating dynamic swirling patterns with motion trails. Fully configurable via a simple text config file.
 
-<img src="Screenshot.png" alt="Image" width="700" height="400">
+<table border="1" cellspacing="0" cellpadding="5">
+    <tr>
+        <td>
+            <img src="screenshots/Screenshot1.png" alt="Screenshot 1" width="450">
+        </td>
+        <td>
+            <img src="screenshots/Screenshot2.png" alt="Screenshot 2" width="450">
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <img src="screenshots/Screenshot3.png" alt="Screenshot 3" width="450">
+        </td>
+        <td>
+            <img src="screenshots/Screenshot4.png" alt="Screenshot 4" width="450">
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <img src="screenshots/Screenshot5.png" alt="Screenshot 5" width="450">
+        </td>
+        <td>
+            <img src="screenshots/Screenshot6.png" alt="Screenshot 6" width="450">
+        </td>
+    </tr>
+</table>
 
 ## Table of Contents
 - [Screensaver](#screensaver)
-	- [Table of Contents](#table-of-contents)
-	- [Features](#features)
-	- [Installation](#installation)
-		- [Dependencies](#dependencies)
-		- [Binary](#binary)
-			- [Releases](#releases)
-			- [Build (Windows / PowerShell)](#build-windows--powershell)
-		- [Configuration](#configuration)
-	- [Run](#run)
-	- [Controls](#controls)
-	- [Tuning \& Performance](#tuning--performance)
-	- [Troubleshooting](#troubleshooting)
-	- [Files](#files)
-	- [License](#license)
+  - [Table of Contents](#table-of-contents)
+  - [Features](#features)
+  - [Installation](#installation)
+    - [Dependencies](#dependencies)
+    - [Binary](#binary)
+      - [Releases](#releases)
+      - [Build (Windows / PowerShell)](#build-windows--powershell)
+    - [Configuration](#configuration)
+  - [Run](#run)
+  - [Controls](#controls)
+  - [Tuning \& Performance](#tuning--performance)
+  - [Troubleshooting](#troubleshooting)
+  - [Files](#files)
+  - [License](#license)
 
 ## Features
 
